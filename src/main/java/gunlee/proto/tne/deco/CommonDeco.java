@@ -3,6 +3,7 @@ package gunlee.proto.tne.deco;
 import gunlee.proto.tne.deco.context.ServletTraceContext;
 import gunlee.proto.tne.deco.context.ServletTraceContextManager;
 
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -13,7 +14,7 @@ public class CommonDeco {
     private static Class[] arg_c = {};
     private static Object[] arg_o = {};
 
-    private static java.lang.reflect.Method getRequestURI;
+    private static Method getRequestURI;
 
     public static void beforeHttpService(Object req, Object res) {
         ServletTraceContext ctx = ServletTraceContextManager.getContext();
@@ -36,6 +37,8 @@ public class CommonDeco {
         Thread.currentThread().setName(orgThreadName +
                                        " [uri]" + ctx.getServiceName() +
                                        " [start at] " + startDateString + " [" + ctx.getStartTime() + "]");
+
+        //String pid = ManagementFactory.getRuntimeMXBean().getName();
     }
 
     public static void afterHttpService(Throwable thr) {

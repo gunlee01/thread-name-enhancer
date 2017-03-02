@@ -26,10 +26,10 @@ public class AgentTransformer implements ClassFileTransformer {
             hookingCtx.set(loader);
 
             ClassReader cr = new ClassReader(classfileBuffer);
-            ClassWriter cw = new ScouterClassWriter(ClassWriter.COMPUTE_MAXS);
+            ClassWriter cw = new ScouterClassWriter(ClassWriter.COMPUTE_FRAMES);
             ClassVisitor cv = new ServletServiceProbe().transform(cw, className);
 
-            cr.accept(cv, ClassReader.EXPAND_FRAMES);
+            cr.accept(cv, ClassReader.SKIP_FRAMES);
 
             System.out.println(className + "\t[" + loader + "]");
 
