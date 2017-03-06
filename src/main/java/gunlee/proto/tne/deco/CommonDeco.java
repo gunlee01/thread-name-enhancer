@@ -6,6 +6,8 @@ import gunlee.proto.tne.deco.context.ServletTraceContextManager;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Gun Lee (gunlee01@gmail.com) on 2016. 9. 4.
@@ -14,7 +16,7 @@ public class CommonDeco {
     private static Class[] arg_c = {};
     private static Object[] arg_o = {};
 
-    private static Method getRequestURI;
+    private static Map<Class<?>, Method> getRequestURIMethodSet = new HashMap<Class<?>, Method>();
 
     public static void beforeHttpService(Object req, Object res) {
         ServletTraceContext ctx = ServletTraceContextManager.getContext();
@@ -54,13 +56,21 @@ public class CommonDeco {
         }
     }
 
+    public static Object lock = new Object();
     public static String getRequestURI(Object req) {
         try {
-            if (getRequestURI == null) {
-                getRequestURI = req.getClass().getMethod("getRequestURI", arg_c);
-                getRequestURI.setAccessible(true);
+            Method m = getRequestURIMethodSet.get(req.getClass());
+            if(m == null) {
+                synchronized(lock) {
+                    m = getRequestURIMethodSet.get(req.getClass());
+                    if (m == null) {
+                        m = req.getClass().getMethod("getRequestURI", arg_c);
+                        m.setAccessible(true);
+                        getRequestURIMethodSet.put(req.getClass(), m);
+                    }
+                }
             }
-            return (String) getRequestURI.invoke(req, arg_o);
+            return (String) m.invoke(req, arg_o);
         } catch (Throwable e) {
             e.printStackTrace();
         }
